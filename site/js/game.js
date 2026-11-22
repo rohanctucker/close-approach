@@ -73,7 +73,7 @@ export class Game {
     this.startedAt = performance.now();
   }
 
-  // Intel Check answers feed the score, so learning moves you up the leaderboard.
+  // Right guesses feed the score, so learning moves you up the leaderboard.
   answerIntel(correct) {
     this.intel.total++;
     let bonus = 0;

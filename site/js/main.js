@@ -20,6 +20,7 @@ const MODE_NAME = { today: "TODAY'S SKY", history: 'ON THIS DAY', legends: 'LEGE
 let today = null;
 let current = null;
 let paused = false;
+let holdBetween = null;
 
 // ---------- element helper (data never goes through innerHTML) ----------
 
@@ -139,6 +140,7 @@ const ui = {
         fill.style.width = getComputedStyle(fill).width;
       };
       $('#bw-go').onclick = finish;
+      holdBetween = hold; // if the phone locks or the app is backgrounded, wait for the player
       $('#bw-notes').onclick = () => {
         hold();
         openNotes(false);
@@ -232,7 +234,7 @@ const ui = {
     $('#over-best').textContent = isBest ? (prev ? `NEW BEST · previous ${fmtScore(prev)}` : 'FIRST SCORE TODAY') : prev ? `BEST ${fmtScore(prev)}` : '';
     const hit = results.filter((r) => r.status === 'hit').length;
     $('#st-int').textContent = `${hit}/${results.length}`;
-    $('#st-intel').textContent = `${intel.correct}/${intel.total}`;
+    $('#st-intel').textContent = intel.total ? `${intel.correct}/${intel.total}` : '—';
     $('#st-shield').textContent = `${Math.round(summary.shield)}%`;
 
     // Streak + badges (real data only)
@@ -324,7 +326,7 @@ function boardKey(mode, dateKey) {
 
 function boardRows(r) {
   const row = (x) =>
-    el('li', { class: x.mine ? 'mine' : null }, el('span', { class: 'rk', text: `${x.rank}` }), el('span', { class: 'nm', text: x.name }), el('span', { class: 'iq', text: x.intelTotal ? `INTEL ${x.intel}/${x.intelTotal}` : '' }), el('span', { class: 'sc', text: fmtScore(x.score) }));
+    el('li', { class: x.mine ? 'mine' : null }, el('span', { class: 'rk', text: `${x.rank}` }), el('span', { class: 'nm', text: x.name }), el('span', { class: 'iq', text: x.intelTotal ? `GUESS ${x.intel}/${x.intelTotal}` : '' }), el('span', { class: 'sc', text: fmtScore(x.score) }));
   const rows = r.top.map(row);
   if (r.me) rows.push(el('li', { class: 'gap', text: '…' }), row(r.me));
   if (!rows.length) rows.push(el('li', { class: 'gap', text: 'No scores yet. Be the first.' }));
@@ -428,7 +430,8 @@ async function share(summary) {
   const hit = summary.results.filter((r) => r.status === 'hit').length;
   const when = mode === 'legends' ? '' : ` · ${fmtDate(dataset.date || todayUTC())}`;
   const url = location.origin + location.pathname;
-  const text = `CLOSE APPROACH ☄️ ${MODE_NAME[mode]}${when}\n${fmtScore(summary.score)} pts · ${hit}/${summary.results.length} real asteroids · 🧠 ${summary.intel.correct}/${summary.intel.total}\n${squares}`;
+  const brain = summary.intel.total ? ` · 🧠 ${summary.intel.correct}/${summary.intel.total}` : '';
+  const text = `CLOSE APPROACH ☄️ ${MODE_NAME[mode]}${when}\n${fmtScore(summary.score)} pts · ${hit}/${summary.results.length} real asteroids${brain}\n${squares}`;
   try {
     if (navigator.share) {
       await navigator.share({ text: `${text}\n${url}` });
@@ -544,6 +547,8 @@ function insets() {
 function resize() {
   const r = app.getBoundingClientRect();
   game.resize(r.width, r.height, Math.min(window.devicePixelRatio || 1, 2), insets());
+  // Phone turned sideways: the "turn upright" screen shows, so stop the action.
+  if (matchMedia('(orientation: landscape) and (max-height: 500px)').matches) setPaused(true);
 }
 
 let last = performance.now();
@@ -592,7 +597,11 @@ document.addEventListener('touchmove', (e) => {
   if (!e.target.closest('.scroll, input')) e.preventDefault();
 }, { passive: false });
 document.addEventListener('gesturestart', (e) => e.preventDefault());
-document.addEventListener('visibilitychange', () => document.hidden && setPaused(true));
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) return;
+  if (!$('#between').hidden && holdBetween) holdBetween();
+  setPaused(true);
+});
 window.addEventListener('resize', resize);
 window.addEventListener('orientationchange', () => setTimeout(resize, 200));
 

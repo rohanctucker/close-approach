@@ -110,7 +110,7 @@
         <h2 class="sheet-title">FIELD NOTES</h2>
         <p class="sheet-sub" id="debrief-sub">What you just fought, in real numbers.</p>
         <section class="intel" id="intel">
-          <div class="intel-k"><span>INTEL CHECK</span><span id="intel-bonus">+400</span></div>
+          <div class="intel-k"><span>QUICK GUESS</span><span id="intel-bonus">+400</span></div>
           <p class="intel-q" id="intel-q"></p>
           <p class="intel-hint" id="intel-hint"></p>
           <div class="intel-opts" id="intel-opts"></div>
@@ -131,7 +131,7 @@
         <div class="best-line" id="over-best"></div>
         <div class="stats">
           <div><b id="st-int">0/0</b><span>INTERCEPTED</span></div>
-          <div><b id="st-intel">0/0</b><span>INTEL</span></div>
+          <div><b id="st-intel">—</b><span>GUESSES</span></div>
           <div><b id="st-shield">0%</b><span>SHIELD</span></div>
         </div>
         <section id="over-badges" hidden>
@@ -228,7 +228,7 @@
           <button type="button" data-board="legends">LEGENDS</button>
         </div>
         <ol class="lb-list" id="board-list"></ol>
-        <p class="fineprint">Your best score per board counts. Intel Check answers add points, so knowing your asteroids moves you up. Daily boards reset with each new sky.</p>
+        <p class="fineprint">Your best score per board counts. Right guesses add points, so knowing your asteroids moves you up. Daily boards reset with each new sky.</p>
       </div>
       <div class="sheet-actions"><button class="btn primary close-btn"><b>BACK</b></button></div>
     </section>
@@ -236,6 +236,7 @@
     <div id="loading" class="screen center">
       <div class="term-line"><span>ESTABLISHING LINK TO CNEOS</span><span class="cursor">▮</span></div>
     </div>
+    <div id="rotate" aria-live="polite"><b>TURN YOUR PHONE UPRIGHT</b><span>Close Approach plays in portrait.</span></div>
     <div id="crt" aria-hidden="true"></div>
   </div>
   <script type="module" src="js/main.js"></script>

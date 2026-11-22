@@ -17,7 +17,7 @@ export const BADGES = [
   { id: 'km', name: 'KILOMETER CLUB', desc: 'Intercept an asteroid at least 1 km across, the size where impacts have global effects.', test: (r) => hitsOf(r).some((o) => o.d >= 1000) },
   { id: 'past', name: 'TIME TRAVELER', desc: 'Intercept a flyby from before 1950. Astronomers reconstruct old passes from orbits.', test: (r) => hitsOf(r).some((o) => year(o) < 1950) },
   { id: 'future', name: 'FORECASTER', desc: 'Intercept a flyby forecast for a future year. Orbits can be predicted decades ahead.', test: (r) => hitsOf(r).some((o) => year(o) > new Date().getUTCFullYear()) },
-  { id: 'intel', name: 'PERFECT INTEL', desc: 'Get every Intel Check right in a run (at least 3 questions).', test: (r) => r.intel.total >= 3 && r.intel.correct === r.intel.total },
+  { id: 'intel', name: 'SHARP EYE', desc: 'Make at least 3 guesses in one run and get every one right.', test: (r) => r.intel.total >= 3 && r.intel.correct === r.intel.total },
   { id: 'clean', name: 'CLEAN SKY', desc: 'Intercept every real asteroid in a run.', test: (r) => r.results.length > 0 && r.results.every((x) => x.status === 'hit') },
   { id: 'streak3', name: 'THREE-DAY ORBIT', desc: "Play Today's Sky three days in a row. Every day is a new, real sky.", test: (r) => r.streak >= 3 },
 ];

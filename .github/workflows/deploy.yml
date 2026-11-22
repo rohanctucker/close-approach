@@ -25,11 +25,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
-          node-version: 22
+          node-version: 24
 
       - name: Tests
         run: |
@@ -41,7 +41,7 @@ jobs:
         run: echo "key=$(date -u +%G-W%V)" >> "$GITHUB_OUTPUT"
 
       - name: Restore archive cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: .cache
           key: archive-v1-${{ steps.week.outputs.key }}
@@ -52,9 +52,9 @@ jobs:
         env:
           FORCE_REFRESH: ${{ inputs.force_refresh && '1' || '0' }}
 
-      - uses: actions/configure-pages@v5
+      - uses: actions/configure-pages@v6
 
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: site
 
@@ -66,4 +66,23 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
+
+  # GitHub pauses scheduled workflows in public repos after 60 days without
+  # commits. An empty commit on the 1st of each month keeps the daily sky
+  # refreshing. Pushes made with GITHUB_TOKEN don't trigger another run.
+  keepalive:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+      - name: Monthly keepalive commit
+        run: |
+          if [ "$(date -u +%d)" = "01" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit --allow-empty -m "chore: keep the daily data refresh alive"
+            git push
+          fi

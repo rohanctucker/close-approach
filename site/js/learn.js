@@ -1,5 +1,5 @@
 // The learning layer: turns raw numbers into things you can picture, and asks
-// one "Intel Check" question per wave (predict first, then see the answer).
+// offers one optional guess per wave (predict first, then see the answer).
 //
 // Reference facts used here were checked against NASA/JPL, ESA and other
 // published sources; see README "Fact sources".
@@ -165,7 +165,7 @@ export function facts(o) {
   return rows;
 }
 
-// ---------- Intel Check ----------
+// ---------- Optional guess (predict, then reveal) ----------
 
 const QUIZ_SIZES = [
   { m: 4.5, text: 'About the size of a car' },
