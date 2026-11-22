@@ -31,8 +31,10 @@ jobs:
         with:
           node-version: 22
 
-      - name: Pipeline tests
-        run: node scripts/test-fetch.mjs
+      - name: Tests
+        run: |
+          node scripts/test-fetch.mjs
+          node leaderboard/test-code.mjs
 
       - name: Cache key (weekly)
         id: week

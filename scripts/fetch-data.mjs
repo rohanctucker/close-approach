@@ -92,7 +92,8 @@ export function compact(row, phaSet = new Set()) {
     t,
     au: +au.toFixed(6),
     ld: +(au / LD_AU).toFixed(2),
-    v: +Number(row.v_rel).toFixed(2),
+    v: +Number(row.v_rel).toFixed(2), // km/s relative to Earth at closest approach
+    vi: row.v_inf == null || row.v_inf === '' ? null : +Number(row.v_inf).toFixed(2), // km/s far from Earth
     h: row.h == null || row.h === '' ? null : Number(row.h),
     d: Math.max(1, Math.round(d.m)),
     dEst: d.est,
@@ -162,14 +163,15 @@ export async function buildHistory(api = cad, log = console.log) {
 
 // ---------- legends ----------
 
+// Blurbs checked against NASA/JPL CNEOS, ESA and other published sources (see README).
 export const LEGENDS = [
-  { key: 'Toutatis', from: '2004-09-26', to: '2004-10-03', blurb: 'Kilometers long and tumbling end over end.' },
-  { key: '2012 DA14', from: '2013-02-13', to: '2013-02-18', blurb: 'Passed inside the ring of geostationary satellites on the same day the unrelated Chelyabinsk meteor exploded over Russia.' },
-  { key: 'Phaethon', from: '2017-12-12', to: '2017-12-20', blurb: 'The parent body of the Geminid meteor shower.' },
-  { key: '2019 OK', from: '2019-07-23', to: '2019-07-28', blurb: 'Spotted only about a day before it flew past.' },
-  { key: '2020 QG', from: '2020-08-14', to: '2020-08-19', blurb: 'Skimmed past at a few thousand kilometers, among the closest flybys ever recorded.' },
-  { key: '2024 YR4', from: '2024-12-21', to: '2024-12-29', blurb: "Topped the world's asteroid-risk lists in early 2025, until follow-up observations ruled out an Earth impact." },
-  { key: 'Apophis', from: '2029-04-10', to: '2029-04-17', blurb: 'Will pass closer than the geostationary satellites in 2029, bright enough to see without a telescope from parts of Earth.' },
+  { key: 'Toutatis', from: '2004-09-26', to: '2004-10-03', blurb: 'A potato-shaped rock about 4.6 km long that tumbles end over end. This was the closest pass of the 21st century by a known asteroid its size.' },
+  { key: '2012 DA14', from: '2013-02-13', to: '2013-02-18', blurb: 'Passed 27,700 km above Earth, inside the ring of geostationary satellites, about 16 hours after the unrelated Chelyabinsk meteor exploded over Russia.' },
+  { key: 'Phaethon', from: '2017-12-12', to: '2017-12-20', blurb: 'The parent body of the Geminid meteor shower. It gets closer to the Sun than any other named asteroid.' },
+  { key: '2019 OK', from: '2019-07-23', to: '2019-07-28', blurb: 'Discovered only a day before it flew past, and publicly announced just hours before closest approach.' },
+  { key: '2020 QG', from: '2020-08-14', to: '2020-08-19', blurb: 'Skimmed 2,950 km above the Indian Ocean, a record for a non-impacting asteroid at the time. It was only spotted six hours after it passed.' },
+  { key: '2024 YR4', from: '2024-12-21', to: '2024-12-29', blurb: 'Passed two days before anyone saw it. In early 2025 it briefly had a better than 1% chance of hitting Earth in 2032, until more observations ruled that out.' },
+  { key: 'Apophis', from: '2029-04-10', to: '2029-04-17', blurb: 'On April 13, 2029, it will pass about 32,000 km above Earth, closer than geostationary satellites, and should be visible to the naked eye from much of Europe, Africa and Asia.' },
 ];
 
 export function matchesLegend(row, key) {

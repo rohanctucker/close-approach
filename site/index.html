@@ -49,6 +49,18 @@
       <button id="pause-btn" class="icon-btn" aria-label="Pause">II</button>
     </div>
     <div id="toasts" aria-live="polite"></div>
+
+    <!-- Between waves: continues on its own -->
+    <section id="between" hidden>
+      <div class="bw-k" id="bw-k">WAVE 1 CLEARED</div>
+      <div id="bw-list"></div>
+      <div class="bw-actions">
+        <button type="button" id="bw-notes" class="chip">FIELD NOTES</button>
+        <button type="button" id="bw-guess" class="chip amber">GUESS +400</button>
+        <button type="button" id="bw-go" class="chip go">NEXT ▸</button>
+      </div>
+      <div class="bw-bar"><i id="bw-fill"></i></div>
+    </section>
     <div id="banner" aria-live="polite"></div>
 
     <!-- Title -->
@@ -83,6 +95,7 @@
 
       <div class="title-foot">
         <button id="logbook-btn" class="link">LOGBOOK <span id="logbook-count">0</span></button>
+        <button id="board-btn" class="link" hidden>LEADERBOARD</button>
         <button id="about-btn" class="link">HOW IT WORKS</button>
         <button id="sound-btn" class="link">SOUND ON</button>
       </div>
@@ -95,9 +108,16 @@
       <div class="sheet-inner scroll">
         <div class="sheet-kicker" id="debrief-kicker">WAVE 1 / 5</div>
         <h2 class="sheet-title">FIELD NOTES</h2>
-        <p class="sheet-sub">What you just fought, in real numbers.</p>
+        <p class="sheet-sub" id="debrief-sub">What you just fought, in real numbers.</p>
+        <section class="intel" id="intel">
+          <div class="intel-k"><span>INTEL CHECK</span><span id="intel-bonus">+400</span></div>
+          <p class="intel-q" id="intel-q"></p>
+          <p class="intel-hint" id="intel-hint"></p>
+          <div class="intel-opts" id="intel-opts"></div>
+          <p class="intel-result" id="intel-result"></p>
+        </section>
         <div id="debrief-cards"></div>
-        <aside class="dyk"><span>DID YOU KNOW</span><p id="dyk-text"></p></aside>
+        <aside class="dyk" id="dyk"><span>DID YOU KNOW</span><p id="dyk-text"></p></aside>
       </div>
       <div class="sheet-actions"><button id="debrief-next" class="btn primary"><b>NEXT WAVE ▸</b></button></div>
     </section>
@@ -111,9 +131,22 @@
         <div class="best-line" id="over-best"></div>
         <div class="stats">
           <div><b id="st-int">0/0</b><span>INTERCEPTED</span></div>
+          <div><b id="st-intel">0/0</b><span>INTEL</span></div>
           <div><b id="st-shield">0%</b><span>SHIELD</span></div>
-          <div><b id="st-acc">0%</b><span>ACCURACY</span></div>
         </div>
+        <section id="over-badges" hidden>
+          <h3 class="list-head">NEW BADGE</h3>
+          <div id="over-badges-list" class="badges"></div>
+        </section>
+        <section id="over-lb" class="lb" hidden>
+          <h3 class="list-head">LEADERBOARD <small id="lb-sub"></small></h3>
+          <form id="lb-form" class="lb-form" hidden>
+            <input id="lb-name" maxlength="12" placeholder="YOUR NAME" autocomplete="nickname" autocapitalize="characters" autocorrect="off" spellcheck="false" enterkeyhint="send">
+            <button class="btn primary" type="submit"><b>POST</b></button>
+          </form>
+          <p class="lb-msg"><span id="lb-msg"></span> <button type="button" id="lb-change" class="link small" hidden>CHANGE NAME</button></p>
+          <ol class="lb-list" id="lb-list"></ol>
+        </section>
         <h3 class="list-head">YOUR SKY <small>tap any asteroid to learn more</small></h3>
         <div id="over-list"></div>
         <p class="fineprint" id="over-src"></p>
@@ -148,6 +181,14 @@
           <li><b>Potentially hazardous</b> asteroids become boss fights.</li>
         </ul>
         <p>Purple debris is made up, to keep things busy. Amber and red rocks are real.</p>
+        <h4>Learn by playing</h4>
+        <ul>
+          <li><b>See it</b>: when you destroy a real asteroid, you see its size drawn to scale next to something familiar, like a bus, a football field or the Eiffel Tower.</li>
+          <li><b>Radar</b>: the dial in the corner shows where each asteroid really passed, compared with the Moon's orbit.</li>
+          <li><b>Feel it</b>: if one slips past, the impact flash shows what a real hit would equal.</li>
+          <li><b>Optional extras</b>: between waves, open the field notes for the full story, or tap Guess to predict something about the asteroid for bonus points. You can also ignore both and keep playing.</li>
+          <li><b>Badges</b> are named after real ideas, like Inside the Moon or Tunguska Stopper. Your <b>logbook</b> keeps every real asteroid you destroy.</li>
+        </ul>
         <h4>Modes</h4>
         <ul>
           <li><b>Today's Sky</b>: today's real flybys. Everyone gets the same level, so you can compare scores.</li>
@@ -155,8 +196,8 @@
           <li><b>Legends</b>: famous flybys, from Toutatis to Apophis in 2029.</li>
         </ul>
         <h4>Units</h4>
-        <p><b>LD</b> means lunar distance: 384,400 km, the average distance to the Moon. Sizes marked <b>≈</b> are estimated from brightness, so the true size can differ.</p>
-        <p class="fineprint">Data: <a href="https://cneos.jpl.nasa.gov/ca/" target="_blank" rel="noopener">NASA/JPL CNEOS close-approach data</a>. Impact energies are rough estimates for a stony asteroid. Made by Rohan Tucker.</p>
+        <p><b>LD</b> means lunar distance: 384,400 km, the average distance to the Moon. Miss distances are measured from Earth's center, as JPL reports them. Sizes marked <b>≈</b> are estimated from brightness, so the true size can differ.</p>
+        <p class="fineprint">Data: <a href="https://cneos.jpl.nasa.gov/ca/" target="_blank" rel="noopener">NASA/JPL CNEOS close-approach data</a>. Impact energies are rough estimates for a stony asteroid. The leaderboard stores only the name you type and your scores; everything else stays on this device. Made by Rohan Tucker.</p>
       </div>
       <div class="sheet-actions"><button class="btn primary close-btn"><b>BACK</b></button></div>
     </section>
@@ -165,9 +206,29 @@
     <section id="logbook" class="screen sheet" hidden>
       <div class="sheet-inner scroll">
         <div class="sheet-kicker">LOGBOOK</div>
-        <h2 class="sheet-title">REAL ASTEROIDS YOU'VE INTERCEPTED</h2>
+        <h2 class="sheet-title">YOUR SPACE RECORD</h2>
         <p class="sheet-sub" id="logbook-sub"></p>
+        <h3 class="list-head" id="badges-head">BADGES</h3>
+        <div id="badges-grid" class="badges"></div>
+        <h3 class="list-head">REAL ASTEROIDS YOU'VE INTERCEPTED <small>tap any asteroid to learn more</small></h3>
         <div id="logbook-list"></div>
+      </div>
+      <div class="sheet-actions"><button class="btn primary close-btn"><b>BACK</b></button></div>
+    </section>
+
+    <!-- Leaderboard -->
+    <section id="board" class="screen sheet" hidden>
+      <div class="sheet-inner scroll">
+        <div class="sheet-kicker">LEADERBOARD</div>
+        <h2 class="sheet-title">TOP DEFENDERS</h2>
+        <p class="sheet-sub" id="board-sub"></p>
+        <div class="seg">
+          <button type="button" data-board="today" class="on">TODAY</button>
+          <button type="button" data-board="history">ON THIS DAY</button>
+          <button type="button" data-board="legends">LEGENDS</button>
+        </div>
+        <ol class="lb-list" id="board-list"></ol>
+        <p class="fineprint">Your best score per board counts. Intel Check answers add points, so knowing your asteroids moves you up. Daily boards reset with each new sky.</p>
       </div>
       <div class="sheet-actions"><button class="btn primary close-btn"><b>BACK</b></button></div>
     </section>

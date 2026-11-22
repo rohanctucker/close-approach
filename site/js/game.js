@@ -1,7 +1,11 @@
 // Game state, waves, entities and collisions.
 
 import { clamp, makeRng, fx, TAU } from './util.js';
-import { C, Starfield, makeBackground, drawEarth, drawShip, drawRock, rockShape, drawBullets, drawParticles, drawDrops } from './render.js';
+import { intelBonus } from './learn.js';
+import { fmtDiameter } from './util.js';
+import { C, Starfield, makeBackground, drawEarth, drawShip, drawRock, rockShape, drawBullets, drawParticles, drawDrops, drawRadar } from './render.js';
+import { refFor } from './scale.js';
+import { impactShort } from './learn.js';
 
 const log10 = Math.log10;
 
@@ -15,6 +19,7 @@ export class Game {
     this.state = 'idle'; // idle | attract | play | over
     this.t = 0;
     this.input = { active: false, tx: 0, ty: 0, keys: new Set() };
+    this.reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
     this.reset();
   }
 
@@ -64,6 +69,22 @@ export class Game {
     this.kills = { debris: 0, real: 0 };
     this.shots = 0;
     this.hits = 0;
+    this.intel = { correct: 0, total: 0, streak: 0 };
+    this.startedAt = performance.now();
+  }
+
+  // Intel Check answers feed the score, so learning moves you up the leaderboard.
+  answerIntel(correct) {
+    this.intel.total++;
+    let bonus = 0;
+    if (correct) {
+      this.intel.correct++;
+      this.intel.streak++;
+      bonus = intelBonus(this.intel.streak);
+      this.score += bonus;
+    } else this.intel.streak = 0;
+    this.emitHud();
+    return bonus;
   }
 
   attract(objects) {
@@ -140,7 +161,9 @@ export class Game {
     // Size and toughness come only from the real diameter, so "bigger = more hits" always holds.
     const r = clamp(13 + 9 * sz, 14, 42) * u;
     const hp = Math.round(clamp(5 + 5 * sz, 5, 22));
-    const vy = (34 + clamp(o.v, 3, 45) * 2.6) * u * (boss ? 0.7 : 1) * this.waves[this.waveIdx].speed;
+    // Fall speed comes only from the real speed relative to Earth (not the wave number).
+    const vy = (34 + clamp(o.v, 3, 45) * 2.6) * u;
+    this.results[head.idx].spawned = true;
     this.rocks.push({
       kind: boss ? 'boss' : 'real',
       obj: o,
@@ -453,6 +476,8 @@ export class Game {
       if (o.d > 120 || big) this.fragment(r, big ? 4 : 2, 0.8);
       if (big || fx() < 0.45) this.drops.push({ x: r.x, y: r.y, vy: 70 * u, type: this.pickDrop() });
       this.ui.kill(o, this.mode);
+      // See the scale right where it happened.
+      this.floaters.push({ x: r.x, y: r.y + 26 * u, vy: -14 * u, text: `${fmtDiameter(o)} · ${refFor(o.d).name.toUpperCase()}${o.d >= refFor(o.d).m * 1.75 ? ' ×' + Math.round(o.d / refFor(o.d).m) : ''}`, color: C.amber, life: 1.8, max: 1.8, size: 16 });
       if (navigator.vibrate) navigator.vibrate(big ? 60 : 25);
     }
     const gained = pts * mult;
@@ -508,6 +533,7 @@ export class Game {
       loss = r.kind === 'boss' ? 20 : clamp(8 + 2 * log10(r.obj.d / 10), 8, 14);
       Object.assign(this.results[r.idx], { status: 'miss', hits: r.max, boss: r.kind === 'boss' });
       this.ui.escape(r.obj, this.mode);
+      this.floaters.push({ x: clamp(r.x, 120 * this.unit, this.W - 120 * this.unit), y: this.earthY - 18 * this.unit, vy: -18 * this.unit, text: impactShort(r.obj), color: C.red, life: 2.2, max: 2.2, size: 18 });
       this.sound.slip();
     }
     if (this.waves[this.waveIdx]) this.waves[this.waveIdx].escapes++;
@@ -542,7 +568,20 @@ export class Game {
     }
     this.sound.end(win);
     this.emitHud();
-    setTimeout(() => this.ui.end({ win, reason, score: this.score, bonus, results: this.results, shield: this.shield, hull: p.hull, accuracy: this.shots ? this.hits / this.shots : 0 }), win ? 900 : 1300);
+    const summary = {
+      win,
+      reason,
+      score: this.score,
+      bonus,
+      results: this.results,
+      shield: this.shield,
+      hull: p.hull,
+      accuracy: this.shots ? this.hits / this.shots : 0,
+      intel: { ...this.intel },
+      waves: this.waveIdx + (win ? 0 : 1),
+      duration: Math.round((performance.now() - this.startedAt) / 1000),
+    };
+    setTimeout(() => this.ui.end(summary), win ? 900 : 1300);
   }
 
   emitHud() {
@@ -563,8 +602,9 @@ export class Game {
     const { ctx, dpr, unit } = this;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.drawImage(this.bg, 0, 0, this.W, this.H);
-    const sx = this.shake ? (fx() - 0.5) * this.shake * unit : 0;
-    const sy = this.shake ? (fx() - 0.5) * this.shake * unit : 0;
+    const shake = this.reduceMotion ? 0 : this.shake;
+    const sx = shake ? (fx() - 0.5) * shake * unit : 0;
+    const sy = shake ? (fx() - 0.5) * shake * unit : 0;
     ctx.translate(sx, sy);
     this.stars.draw(ctx, unit, this.warp * this.warp);
     drawEarth(ctx, this, this.t);
@@ -573,7 +613,10 @@ export class Game {
     drawBullets(ctx, this.bullets, unit);
     if (this.player) drawShip(ctx, this.player, unit, this.t);
     drawParticles(ctx, this);
-    if (this.state === 'play' || this.state === 'over') this.drawShieldLabel();
+    if (this.state === 'play' || this.state === 'over') {
+      this.drawShieldLabel();
+      drawRadar(ctx, this, this.t);
+    }
   }
 
   drawShieldLabel() {

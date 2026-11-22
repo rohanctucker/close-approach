@@ -1,7 +1,7 @@
 // Drawing: retro-vector look built from double strokes (a wide faint pass plus
 // a thin bright pass) instead of canvas shadowBlur, which is slow on phones.
 
-import { TAU, makeRng, fx, label, fmtDiameter, fmtLD } from './util.js';
+import { TAU, makeRng, fx, label, fmtDiameter, fmtLD, hashString } from './util.js';
 
 export const C = {
   bg0: '#04030b',
@@ -438,5 +438,83 @@ export function drawDrops(ctx, drops, unit, t) {
     ctx.fillText(d.type === 'shield' ? 'S' : d.type === 'spread' ? 'W' : 'R', 0, 1 * unit);
     ctx.restore();
   }
+  ctx.restore();
+}
+
+// ---------- radar: where each real asteroid truly passed ----------
+// Log scale from Earth: rings mark geostationary orbit, the Moon, and 10× the Moon.
+
+const LOG_MIN = Math.log10(0.02);
+const LOG_MAX = Math.log10(200);
+const radarR = (ld) => Math.min(1, Math.max(0.07, (Math.log10(Math.max(ld, 0.005)) - LOG_MIN) / (LOG_MAX - LOG_MIN)));
+
+export function drawRadar(ctx, g, t) {
+  const u = g.unit;
+  const R = 31 * u;
+  const cx = g.W - R - 12 * u;
+  const cy = g.insets.top + 78 + R;
+  ctx.save();
+  ctx.fillStyle = 'rgba(6, 4, 16, 0.6)';
+  ctx.beginPath();
+  ctx.arc(cx, cy, R + 5 * u, 0, TAU);
+  ctx.fill();
+  ctx.strokeStyle = hexA(C.cyan, 0.25);
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  ctx.font = `${Math.round(10 * u)}px VT323, monospace`;
+  ctx.textAlign = 'left';
+  ctx.textAlign = 'center';
+  for (const [ld, name, a, ang] of [[0.11, '', 0.18, 0], [1, 'MOON', 0.55, Math.PI * 0.5], [10, '10× MOON', 0.35, -Math.PI * 0.5]]) {
+    const r = radarR(ld) * R;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, TAU);
+    ctx.strokeStyle = hexA(C.cyan, a);
+    ctx.setLineDash(name === 'MOON' ? [] : [2 * u, 3 * u]);
+    ctx.stroke();
+    if (name) {
+      ctx.fillStyle = hexA(C.cyan, 0.8);
+      ctx.fillText(name, cx + Math.cos(ang) * r, cy + Math.sin(ang) * r + (ang > 0 ? 9 * u : -2 * u));
+    }
+  }
+  ctx.setLineDash([]);
+  // Earth
+  ctx.fillStyle = C.cyan;
+  ctx.beginPath();
+  ctx.arc(cx, cy, 2.4 * u, 0, TAU);
+  ctx.fill();
+
+  // Blips for real asteroids that have appeared
+  ctx.globalCompositeOperation = 'lighter';
+  for (const r of g.results) {
+    if (!r.spawned) continue;
+    const a = (hashString(r.o.id + r.o.t) / 4294967296) * TAU;
+    const rr = radarR(r.o.ld) * R;
+    const x = cx + Math.cos(a) * rr;
+    const y = cy + Math.sin(a) * rr;
+    let col = C.white;
+    let size = 2.2 * u;
+    if (r.status === 'hit') col = C.amber;
+    else if (r.status === 'miss') col = C.red;
+    else size = (2.2 + Math.sin(t * 8) * 0.9) * u;
+    ctx.fillStyle = col;
+    ctx.globalAlpha = r.status === 'pending' ? 1 : 0.85;
+    ctx.beginPath();
+    ctx.arc(x, y, size, 0, TAU);
+    ctx.fill();
+    if (r.status === 'pending') {
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(x, y);
+      ctx.strokeStyle = hexA(C.white, 0.25);
+      ctx.stroke();
+    }
+  }
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.globalAlpha = 0.7;
+  ctx.fillStyle = C.cyan;
+  ctx.textAlign = 'center';
+  ctx.font = `${Math.round(10 * u)}px VT323, monospace`;
+  ctx.fillText('REAL MISS DISTANCE', cx, cy + R + 15 * u);
   ctx.restore();
 }

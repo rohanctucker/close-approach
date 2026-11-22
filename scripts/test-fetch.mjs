@@ -36,6 +36,7 @@ assert.equal(c.t, '2026-11-22T04:21Z');
 assert.ok(Math.abs(c.ld - 1.68) < 0.02, `0.00431 au should be ~1.68 LD, got ${c.ld}`);
 assert.equal(c.pha, true);
 assert.ok(c.d > 8 && c.d < 20);
+assert.equal(c.vi, 9.24, 'keeps v_inf for impact energy');
 
 // buildToday widens the search on a quiet day and never throws on small results.
 const calls = [];

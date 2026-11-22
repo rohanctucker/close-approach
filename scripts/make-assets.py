@@ -143,7 +143,7 @@ def og():
     vt = ImageFont.truetype(VT, 30)
     vt_small = ImageFont.truetype(VT, 26)
     d = ImageDraw.Draw(img)
-    d.text((210, 214), "2026 WJ  ·  14 m", font=vt_small, fill=AMBER + (255,), anchor="mm")
+    d.text((210, 214), "2026 WJ  ·  ≈13 m", font=vt_small, fill=AMBER + (255,), anchor="mm")
     d.text((975, 282), "APOPHIS  ·  2029", font=vt_small, fill=RED + (255,), anchor="mm")
     chrome_text(img, (W / 2, 245), "CLOSE", ImageFont.truetype(SYNC, 118))
     chrome_text(img, (W / 2, 350), "APPROACH", ImageFont.truetype(SYNC, 76))
