@@ -95,15 +95,20 @@ export async function loadHistory(dateISO) {
 export function pickHistory(objects, dateISO, count = 12) {
   const rng = makeRng(`history:${dateISO}`);
   const chosen = new Map();
-  const add = (o) => o && chosen.size < count && chosen.set(o.id + o.t, o);
+  const ids = new Set();
+  const add = (o) => {
+    if (!o || chosen.size >= count || ids.has(o.id)) return;
+    ids.add(o.id);
+    chosen.set(o.id + o.t, o);
+  };
   const by = (f) => [...objects].sort(f);
   by((a, b) => a.au - b.au).slice(0, 4).forEach(add);
   by((a, b) => b.d - a.d).slice(0, 3).forEach(add);
   objects.filter((o) => o.pha).slice(0, 3).forEach(add);
   const now = Date.now();
   objects.filter((o) => Date.parse(o.t) > now).sort((a, b) => a.au - b.au).slice(0, 2).forEach(add);
-  const rest = objects.filter((o) => !chosen.has(o.id + o.t));
-  while (chosen.size < Math.min(count, objects.length) && rest.length) add(rest.splice(Math.floor(rng() * rest.length), 1)[0]);
+  const rest = objects.filter((o) => !ids.has(o.id));
+  while (chosen.size < count && rest.length) add(rest.splice(Math.floor(rng() * rest.length), 1)[0]);
   return [...chosen.values()].sort((a, b) => a.t.localeCompare(b.t));
 }
 

@@ -165,7 +165,7 @@ export async function buildHistory(api = cad, log = console.log) {
 
 // Blurbs checked against NASA/JPL CNEOS, ESA and other published sources (see README).
 export const LEGENDS = [
-  { key: 'Toutatis', from: '2004-09-26', to: '2004-10-03', blurb: 'A potato-shaped rock about 4.6 km long that tumbles end over end. This was the closest pass of the 21st century by a known asteroid its size.' },
+  { key: 'Toutatis', from: '2004-09-26', to: '2004-10-03', blurb: 'A lumpy, kilometers-long rock that tumbles end over end. This was the closest pass of the 21st century by a known asteroid its size.' },
   { key: '2012 DA14', from: '2013-02-13', to: '2013-02-18', blurb: 'Passed 27,700 km above Earth, inside the ring of geostationary satellites, about 16 hours after the unrelated Chelyabinsk meteor exploded over Russia.' },
   { key: 'Phaethon', from: '2017-12-12', to: '2017-12-20', blurb: 'The parent body of the Geminid meteor shower. It gets closer to the Sun than any other named asteroid.' },
   { key: '2019 OK', from: '2019-07-23', to: '2019-07-28', blurb: 'Discovered only a day before it flew past, and publicly announced just hours before closest approach.' },
@@ -240,12 +240,16 @@ async function main() {
     }
   } else console.log('history: using cache');
 
+  // Legends are only 14 small requests, so rebuild them every run; that way
+  // edits to the blurbs ship right away. Keep the cached copy if JPL is down.
   const legendsFile = path.join(CACHE, 'legends.json');
-  if (force || (await stale(legendsFile))) {
+  try {
     const legends = await buildLegends();
     if (legends.objects.length) await writeJSON(legendsFile, legends);
     console.log(`legends: ${legends.objects.length}`);
-  } else console.log('legends: using cache');
+  } catch (e) {
+    warn(`legends refresh failed, using cache: ${e.message}`);
+  }
 
   if (await exists(histDir)) await cp(histDir, path.join(OUT, 'history'), { recursive: true });
   if (await exists(legendsFile)) await cp(legendsFile, path.join(OUT, 'legends.json'));

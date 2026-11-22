@@ -101,7 +101,7 @@ If the build-time feed fails, the game falls back to NASA's NeoWs API from the b
 | Chelyabinsk 2013: ~18 m, ~440–500 kt, ~1,500 injured mostly by glass | [JPL](https://www.jpl.nasa.gov/news/additional-details-on-the-large-feb-15-fireball-over-russia/), [Wikipedia](https://en.wikipedia.org/wiki/Chelyabinsk_meteor) |
 | Tunguska 1908: ~50–60 m, 2,150 km², 80 million trees | [Wikipedia](https://en.wikipedia.org/wiki/Tunguska_event) |
 | DART shortened Dimorphos' orbit by 32 minutes | [NASA](https://www.nasa.gov/news-release/nasa-confirms-dart-mission-impact-changed-asteroids-motion-in-space) |
-| Toutatis 2004: ~4.6 km, 1.55 million km, closest this century for its size | [CNEOS](https://cneos.jpl.nasa.gov/news/news144.html) |
+| Toutatis 2004: km-scale and tumbling, 1.55 million km, closest this century for its size | [CNEOS](https://cneos.jpl.nasa.gov/news/news144.html) |
 | 2012 DA14: 27,700 km above Earth, ~16 h after Chelyabinsk, unrelated | [CNEOS](https://cneos.jpl.nasa.gov/news/fireball_130301.html) |
 | Phaethon: Geminid parent; closest to the Sun of named asteroids | [Wikipedia](https://en.wikipedia.org/wiki/3200_Phaethon) |
 | 2019 OK: found a day before; announced hours before | [CNEOS](https://cneos.jpl.nasa.gov/news/news203.html), [Wikipedia](https://en.wikipedia.org/wiki/2019_OK) |
