@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>Close Approach: defend Earth from today's real asteroids</title>
+  <meta name="description" content="An arcade game built from real NASA/JPL data. Every named asteroid is a real one passing Earth today. Clear a wave, then learn what you just fought.">
+  <meta name="theme-color" content="#04030b">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Close Approach">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="icons/icon-192.png">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Close Approach">
+  <meta property="og:description" content="Defend Earth from the real asteroids passing it today. Built from live NASA/JPL data.">
+  <meta property="og:url" content="https://rohanctucker.github.io/close-approach/">
+  <meta property="og:image" content="https://rohanctucker.github.io/close-approach/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="preload" href="fonts/VT323-Regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/Syncopate-Bold.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="app">
+    <canvas id="game" aria-label="Game"></canvas>
+    <div id="safe-probe" aria-hidden="true"></div>
+
+    <div id="hud" hidden>
+      <div class="hud-cell">
+        <div class="hud-label">SCORE</div>
+        <div id="score" class="hud-num">0</div>
+        <div id="mult" class="hud-mult"></div>
+      </div>
+      <div class="hud-cell center">
+        <div class="hud-label">WAVE</div>
+        <div id="wave" class="hud-num small">1/5</div>
+      </div>
+      <div class="hud-cell right">
+        <div class="hud-label">HULL</div>
+        <div id="hull" class="hull"></div>
+      </div>
+      <button id="pause-btn" class="icon-btn" aria-label="Pause">II</button>
+    </div>
+    <div id="toasts" aria-live="polite"></div>
+    <div id="banner" aria-live="polite"></div>
+
+    <!-- Title -->
+    <section id="title" class="screen" hidden>
+      <div class="term-line"><span id="link-status">ESTABLISHING LINK</span><span class="cursor">▮</span></div>
+      <div class="logo-wrap">
+        <svg class="orbit" viewBox="0 0 300 100" aria-hidden="true">
+          <ellipse cx="150" cy="50" rx="146" ry="30" />
+          <circle r="2.6">
+            <animateMotion dur="7s" repeatCount="indefinite" path="M4,50 a146,30 0 1,0 292,0 a146,30 0 1,0 -292,0" />
+          </circle>
+        </svg>
+        <h1 class="logo"><span>CLOSE</span><span>APPROACH</span></h1>
+        <p class="tag">Defend Earth from the real asteroids passing it today</p>
+      </div>
+
+      <div class="panel" id="feed">
+        <div class="row"><span>FEED</span><b id="feed-src">…</b></div>
+        <div class="row"><span>DATE</span><b id="feed-date">…</b></div>
+        <div class="row"><span>FLYBYS</span><b id="feed-count">…</b></div>
+        <div class="row"><span>CLOSEST</span><b id="feed-closest">…</b></div>
+      </div>
+
+      <div class="modes">
+        <button class="btn primary" data-mode="today"><b>TODAY'S SKY</b><small id="today-sub">Today's real flybys · same level for everyone</small></button>
+        <div class="mode-row">
+          <button class="btn" data-mode="history"><b>ON THIS DAY</b><small>1900 → 2100</small></button>
+          <button class="btn" data-mode="legends"><b>LEGENDS</b><small>Famous flybys</small></button>
+        </div>
+        <div id="best-line" class="best-line"></div>
+      </div>
+
+      <div class="title-foot">
+        <button id="logbook-btn" class="link">LOGBOOK <span id="logbook-count">0</span></button>
+        <button id="about-btn" class="link">HOW IT WORKS</button>
+        <button id="sound-btn" class="link">SOUND ON</button>
+      </div>
+      <p class="hint">Drag anywhere to fly. You fire automatically.</p>
+      <p class="hint ios-hint" hidden>Tip: tap Share → Add to Home Screen to play full screen.</p>
+    </section>
+
+    <!-- Wave debrief -->
+    <section id="debrief" class="screen sheet" hidden>
+      <div class="sheet-inner scroll">
+        <div class="sheet-kicker" id="debrief-kicker">WAVE 1 / 5</div>
+        <h2 class="sheet-title">FIELD NOTES</h2>
+        <p class="sheet-sub">What you just fought, in real numbers.</p>
+        <div id="debrief-cards"></div>
+        <aside class="dyk"><span>DID YOU KNOW</span><p id="dyk-text"></p></aside>
+      </div>
+      <div class="sheet-actions"><button id="debrief-next" class="btn primary"><b>NEXT WAVE ▸</b></button></div>
+    </section>
+
+    <!-- Game over -->
+    <section id="over" class="screen sheet" hidden>
+      <div class="sheet-inner scroll">
+        <div class="sheet-kicker" id="over-kicker">TODAY'S SKY</div>
+        <h2 class="sheet-title big" id="over-title">SKY CLEARED</h2>
+        <div class="score-big" id="over-score">0</div>
+        <div class="best-line" id="over-best"></div>
+        <div class="stats">
+          <div><b id="st-int">0/0</b><span>INTERCEPTED</span></div>
+          <div><b id="st-shield">0%</b><span>SHIELD</span></div>
+          <div><b id="st-acc">0%</b><span>ACCURACY</span></div>
+        </div>
+        <h3 class="list-head">YOUR SKY <small>tap any asteroid to learn more</small></h3>
+        <div id="over-list"></div>
+        <p class="fineprint" id="over-src"></p>
+      </div>
+      <div class="sheet-actions">
+        <button id="share-btn" class="btn primary"><b>SHARE SCORE</b></button>
+        <div class="mode-row">
+          <button id="again-btn" class="btn"><b>PLAY AGAIN</b></button>
+          <button class="btn menu-btn"><b>MENU</b></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pause -->
+    <section id="paused" class="screen center" hidden>
+      <h2 class="sheet-title big">PAUSED</h2>
+      <button id="resume-btn" class="btn primary wide"><b>RESUME</b></button>
+      <button class="btn wide menu-btn"><b>QUIT TO MENU</b></button>
+    </section>
+
+    <!-- About -->
+    <section id="about" class="screen sheet" hidden>
+      <div class="sheet-inner scroll prose">
+        <div class="sheet-kicker">HOW IT WORKS</div>
+        <h2 class="sheet-title">EVERY NAMED ROCK IS REAL</h2>
+        <p>The asteroids with names come from NASA/JPL's Center for Near-Earth Object Studies (CNEOS), which tracks every known asteroid flyby. The data refreshes every night.</p>
+        <h4>The game is the data</h4>
+        <ul>
+          <li><b>Size</b> sets how big a rock looks and how many hits it takes.</li>
+          <li><b>Speed</b> sets how fast it falls.</li>
+          <li><b>Miss distance</b> sets the order in Today's Sky. The closest flyby comes last.</li>
+          <li><b>Potentially hazardous</b> asteroids become boss fights.</li>
+        </ul>
+        <p>Purple debris is made up, to keep things busy. Amber and red rocks are real.</p>
+        <h4>Modes</h4>
+        <ul>
+          <li><b>Today's Sky</b>: today's real flybys. Everyone gets the same level, so you can compare scores.</li>
+          <li><b>On This Day</b>: close flybys on today's calendar date from 1900 to 2100, in time order. Future ones are forecasts.</li>
+          <li><b>Legends</b>: famous flybys, from Toutatis to Apophis in 2029.</li>
+        </ul>
+        <h4>Units</h4>
+        <p><b>LD</b> means lunar distance: 384,400 km, the average distance to the Moon. Sizes marked <b>≈</b> are estimated from brightness, so the true size can differ.</p>
+        <p class="fineprint">Data: <a href="https://cneos.jpl.nasa.gov/ca/" target="_blank" rel="noopener">NASA/JPL CNEOS close-approach data</a>. Impact energies are rough estimates for a stony asteroid. Made by Rohan Tucker.</p>
+      </div>
+      <div class="sheet-actions"><button class="btn primary close-btn"><b>BACK</b></button></div>
+    </section>
+
+    <!-- Logbook -->
+    <section id="logbook" class="screen sheet" hidden>
+      <div class="sheet-inner scroll">
+        <div class="sheet-kicker">LOGBOOK</div>
+        <h2 class="sheet-title">REAL ASTEROIDS YOU'VE INTERCEPTED</h2>
+        <p class="sheet-sub" id="logbook-sub"></p>
+        <div id="logbook-list"></div>
+      </div>
+      <div class="sheet-actions"><button class="btn primary close-btn"><b>BACK</b></button></div>
+    </section>
+
+    <div id="loading" class="screen center">
+      <div class="term-line"><span>ESTABLISHING LINK TO CNEOS</span><span class="cursor">▮</span></div>
+    </div>
+    <div id="crt" aria-hidden="true"></div>
+  </div>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

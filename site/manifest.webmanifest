@@ -1,0 +1,16 @@
+{
+  "name": "Close Approach",
+  "short_name": "Close Approach",
+  "description": "Defend Earth from the real asteroids passing it today.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#04030b",
+  "theme_color": "#04030b",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
