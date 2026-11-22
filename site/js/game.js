@@ -293,6 +293,7 @@ export class Game {
         this.phase = 'cleared';
         const w = this.waves[this.waveIdx];
         const bonus = w.escapes === 0 ? 250 * (this.waveIdx + 1) : 0;
+        this.shield = Math.min(100, this.shield + 8); // a little repair between waves
         if (bonus) {
           this.score += bonus;
           this.floaters.push({ x: this.W / 2, y: this.H * 0.42, vy: -20 * u, text: `CLEAN SWEEP +${bonus}`, color: C.cyan, life: 1.8, max: 1.8, size: 24 });
@@ -502,7 +503,7 @@ export class Game {
 
   escape(r) {
     r.dead = true;
-    let loss = 3;
+    let loss = 1.5; // debris is filler; the real asteroids are what matter
     if (r.kind !== 'debris') {
       loss = r.kind === 'boss' ? 20 : clamp(8 + 2 * log10(r.obj.d / 10), 8, 14);
       Object.assign(this.results[r.idx], { status: 'miss', hits: r.max, boss: r.kind === 'boss' });

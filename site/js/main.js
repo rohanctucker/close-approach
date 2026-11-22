@@ -114,7 +114,7 @@ const ui = {
     title.className = `sheet-title big ${win ? 'win' : 'lose'}`;
     $('#over-kicker').textContent = `${MODE_NAME[mode]}${mode === 'legends' ? '' : ` · ${fmtDate(current.dataset.date || todayUTC())}`}`;
     $('#over-score').textContent = fmtScore(score);
-    $('#over-best').textContent = isBest ? (prev ? `NEW BEST · previous ${fmtScore(prev)}` : 'FIRST RUN TODAY') : `BEST ${fmtScore(prev)}`;
+    $('#over-best').textContent = isBest ? (prev ? `NEW BEST · previous ${fmtScore(prev)}` : 'FIRST SCORE TODAY') : prev ? `BEST ${fmtScore(prev)}` : '';
     const hit = results.filter((r) => r.status === 'hit').length;
     $('#st-int').textContent = `${hit}/${results.length}`;
     $('#st-shield').textContent = `${Math.round(summary.shield)}%`;
