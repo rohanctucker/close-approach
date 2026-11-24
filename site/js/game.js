@@ -477,7 +477,7 @@ export class Game {
       if (big || fx() < 0.45) this.drops.push({ x: r.x, y: r.y, vy: 70 * u, type: this.pickDrop() });
       this.ui.kill(o, this.mode);
       // See the scale right where it happened.
-      this.floaters.push({ x: r.x, y: r.y + 26 * u, vy: -14 * u, text: `${fmtDiameter(o)} · ${refFor(o.d).name.toUpperCase()}${o.d >= refFor(o.d).m * 1.75 ? ' ×' + Math.round(o.d / refFor(o.d).m) : ''}`, color: C.amber, life: 1.8, max: 1.8, size: 16 });
+      this.floaters.push({ x: r.x, y: r.y + r.r + 24 * u, vy: -10 * u, text: `${fmtDiameter(o)} · ${refFor(o.d).name.toUpperCase()}${o.d >= refFor(o.d).m * 1.75 ? ' ×' + Math.round(o.d / refFor(o.d).m) : ''}`, color: C.amber, life: 1.8, max: 1.8, size: 16 });
       if (navigator.vibrate) navigator.vibrate(big ? 60 : 25);
     }
     const gained = pts * mult;
