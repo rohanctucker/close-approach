@@ -116,7 +116,7 @@ const ui = {
             el('div', { class: 'bw-txt' },
               el('b', { text: label(o) }),
               el('span', { text: `${fmtDiameter(o)} · ${sizeCompare(o.d)}` }),
-              el('span', { class: 'bw-dist', text: `Really passed ${distanceCompare(o).ref}` }),
+              el('span', { class: 'bw-dist', text: `${Date.parse(o.t) > Date.now() ? 'Will pass' : 'Really passed'} ${distanceCompare(o).ref}` }),
             ),
           ),
         ),

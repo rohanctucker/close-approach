@@ -146,7 +146,9 @@ export function gameplayLine(item) {
   }
   if (status === 'miss') {
     const d = o.ld < 1 ? `${distanceCompare(o).km} km from Earth's center` : `${o.ld.toFixed(1)} lunar distances away`;
-    return `It slipped past you, but the real one passed ${d}. No shield needed.`;
+    return Date.parse(o.t) > Date.now()
+      ? `It slipped past you, but the real one will pass ${d}. No shield needed.`
+      : `It slipped past you, but the real one passed ${d}. No shield needed.`;
   }
   return "You didn't reach this one.";
 }
